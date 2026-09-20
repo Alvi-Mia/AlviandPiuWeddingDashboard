@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Biye — Wedding Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root {
+    box-sizing: border-box;
+    --maroon: #7A1E3C;
+    --maroon-deep: #5A1530;
+    --marigold: #DE9F1F;
+    --marigold-light: #F0C464;
+    --teal: #164E48;
+    --teal-light: #2A7268;
+    --cream: #FBF1E0;
+    --cream-2: #F5E6CC;
+    --ink: #2B1810;
+    --blush: #D9756B;
+    --line: rgba(43,24,16,0.14);
+    --card: #FFFDF7;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --cream: #211311;
+      --cream-2: #2A1917;
+      --ink: #F3E7D8;
+      --card: #2A1917;
+      --line: rgba(243,231,216,0.14);
+      --marigold-light: #E7B84C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --cream: #211311;
+    --cream-2: #2A1917;
+    --ink: #F3E7D8;
+    --card: #2A1917;
+    --line: rgba(243,231,216,0.14);
+    --marigold-light: #E7B84C;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Jost', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .serif { font-family: 'Marcellus', serif; font-weight: 400; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-deep) 100%);
+    color: var(--cream-2);
+    padding: 3.2rem 1.5rem 2.6rem;
+    overflow: hidden;
+  }
+  .hero-motif {
+    position: absolute;
+    inset: 0;
+    opacity: 0.16;
+    pointer-events: none;
+  }
+  .hero-inner {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    color: var(--marigold-light);
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    margin: 0 0 0.4rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.1rem, 6vw, 3.2rem);
+    margin: 0 0 0.3rem;
+    color: #FBF1E0;
+  }
+  .hero-date {
+    font-size: 1.05rem;
+    color: var(--cream-2);
+    opacity: 0.85;
+    margin: 0 0 1.8rem;
+  }
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: clamp(0.6rem, 3vw, 1.6rem);
+    flex-wrap: wrap;
+  }
+  .count-block { min-width: 68px; }
+  .count-num {
+    font-family: 'Marcellus', serif;
+    font-size: clamp(2rem, 7vw, 3rem);
+    color: var(--marigold-light);
+    line-height: 1;
+  }
+  .count-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: 0.75;
+    margin-top: 0.35rem;
+  }
+  .hero-arrived {
+    font-family: 'Marcellus', serif;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    color: var(--marigold-light);
+  }
+
+  /* ---------- Nav ---------- */
+  .tabs {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: var(--cream);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.6rem 1rem;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    background: none;
+    border: none;
+    color: var(--ink);
+    opacity: 0.55;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, background 0.15s ease;
+  }
+  .tab-btn:hover { opacity: 0.85; }
+  .tab-btn.active {
+    opacity: 1;
+    background: var(--maroon);
+    color: #FBF1E0;
+  }
+
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 1.4rem 5rem;
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  section.block { margin-bottom: 2.6rem; }
+  .block-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0.6rem;
+  }
+  .block-head h2 { font-size: 1.5rem; margin: 0; }
+  .block-sub { font-size: 0.85rem; opacity: 0.6; }
+
+  /* ---------- Timeline (events) ---------- */
+  .event-row {
+    display: grid;
+    grid-template-columns: 84px 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .event-row:last-child { border-bottom: none; }
+  .event-date {
+    font-family: 'Marcellus', serif;
+    font-size: 1.5rem;
+    color: var(--maroon);
+    text-align: center;
+    line-height: 1.05;
+  }
+  :root[data-theme="dark"] .event-date, body:not([data-theme]) .event-date { }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .event-date { color: var(--marigold-light); } }
+  :root[data-theme="dark"] .event-date { color: var(--marigold-light); }
+  .event-date .mon { display:block; font-family:'Jost',sans-serif; font-size:0.68rem; letter-spacing:0.1em; opacity:0.6; margin-top:2px; }
+  .event-name { font-family: 'Marcellus', serif; font-size: 1.15rem; }
+  .event-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    margin-top: 0.3rem;
+    border: 1px solid currentColor;
+    opacity: 0.75;
+  }
+  .event-input {
+    justify-self: end;
+  }
+  .event-input input[type="date"] {
+    font-family: 'Jost', sans-serif;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.82rem;
+  }
+  .add-event-row {
+    display: grid;
+    grid-template-columns: 1fr 150px auto;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  /* ---------- Shared inputs / buttons ---------- */
+  input[type="text"], input[type="number"], select {
+    font-family: 'Jost', sans-serif;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+  input:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--marigold);
+    outline-offset: 1px;
+  }
+  button {
+    font-family: 'Jost', sans-serif;
+    cursor: pointer;
+  }
+  .btn {
+    background: var(--maroon);
+    color: #FBF1E0;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--maroon-deep); }
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--ink);
+    opacity: 0.4;
+    font-size: 1.1rem;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+  }
+  .icon-btn:hover { opacity: 0.9; }
+
+  /* ---------- Tasks ---------- */
+  .task-phase { margin-bottom: 1.8rem; }
+  .phase-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Marcellus', serif;
+    font-size: 1.05rem;
+    color: var(--teal);
+    margin-bottom: 0.6rem;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .phase-title { color: var(--teal-light); } }
+  :root[data-theme="dark"] .phase-title { color: var(--teal-light); }
+  .phase-progress {
+    font-size: 0.75rem;
+    opacity: 0.55;
+    font-family: 'Jost', sans-serif;
+  }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.55rem 0.2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    min-width: 20px;
+    border: 1.5px solid var(--maroon);
+    border-radius: 5px;
+    margin-top: 0.1rem;
+    cursor: pointer;
+    position: relative;
+    background: var(--card);
+  }
+  .task-check:checked {
+    background: var(--maroon);
+  }
+  .task-check:checked::after {
+    content: "✓";
+    color: #FBF1E0;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+  .task-text { flex: 1; font-size: 0.94rem; }
+  .task-text.done { text-decoration: line-through; opacity: 0.45; }
+  .task-cat {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    opacity: 0.55;
+    display: block;
+    margin-top: 0.1rem;
+  }
+  .add-task-row {
+    display: grid;
+    grid-template-columns: 1fr 140px auto;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+  }
+
+  /* ---------- Budget ---------- */
+  .budget-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.6rem;
+  }
+  .sum-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+  }
+  .sum-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.55; }
+  .sum-value { font-family: 'Marcellus', serif; font-size: 1.5rem; margin-top: 0.2rem; }
+  .sum-value.over { color: var(--blush); }
+  .budget-total-edit {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+  }
+  .budget-total-edit input { width: 120px; }
+
+  table.budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .budget-table th {
+    text-align: left;
+    font-weight: 500;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+    padding: 0 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .budget-table td {
+    padding: 0.55rem 0.4rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .budget-table input[type="text"] { border: none; background: none; padding: 0.2rem; }
+  .budget-table input[type="number"] { border: none; background: none; padding: 0.2rem; text-align: right; }
+  .bar-cell { width: 120px; }
+  .bar-track {
+    height: 6px;
+    border-radius: 4px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--marigold);
+  }
+  .bar-fill.over { background: var(--blush); }
+  .add-budget-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 120px auto;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem 1rem 3rem;
+    font-size: 0.8rem;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 560px) {
+    .budget-summary { grid-template-columns: 1fr; }
+    .add-budget-row { grid-template-columns: 1fr; }
+    .add-event-row { grid-template-columns: 1fr; }
+    .add-task-row { grid-template-columns: 1fr; }
+    .event-row { grid-template-columns: 60px 1fr auto; }
+    .event-input { grid-column: 1 / -1; justify-self: start; margin-top: 0.4rem; }
+    table.budget-table thead { display: none; }
+    table.budget-table, table.budget-table tbody, table.budget-table tr, table.budget-table td { display: block; width: 100%; }
+    .budget-table tr { padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+    .budget-table td { border-bottom: none; padding: 0.2rem 0; }
+    .bar-cell { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <svg class="hero-motif" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <g fill="none" stroke="#F0C464" stroke-width="1.4">
+      <path d="M40 260 C40 200 110 200 110 260 C110 300 40 300 40 260 Z"/>
+      <path d="M760 40 C760 100 690 100 690 40 C690 0 760 0 760 40 Z"/>
+      <circle cx="400" cy="40" r="18"/>
+      <circle cx="400" cy="40" r="30"/>
+      <path d="M120 20 Q140 0 160 20 Q140 40 120 20 Z"/>
+      <path d="M640 280 Q660 260 680 280 Q660 300 640 280 Z"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <p class="hero-eyebrow serif" id="coupleNames">Our Wedding</p>
+    <h1>Biye</h1>
+    <p class="hero-date" id="weddingDateLabel">July 27, 2026</p>
+    <div id="countdownWrap">
+      <div class="countdown" id="countdown">
+        <div class="count-block"><div class="count-num" id="cd-days">--</div><div class="count-label">Days</div></div>
+        <div class="count-block"><div class="count-num" id="cd-hours">--</div><div class="count-label">Hours</div></div>
+        <div class="count-block"><div class="count-num" id="cd-mins">--</div><div class="count-label">Mins</div></div>
+        <div class="count-block"><div class="count-num" id="cd-secs">--</div><div class="count-label">Secs</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" data-view="timeline">Ceremonies</button>
+  <button class="tab-btn" data-view="tasks">Tasks</button>
+  <button class="tab-btn" data-view="budget">Budget</button>
+  <button class="tab-btn" data-view="sync">Sync</button>
+</nav>
+
+<main>
+
+  <!-- TIMELINE VIEW -->
+  <div class="view active" id="view-timeline">
+    <section class="block">
+      <div class="block-head">
+        <h2>Ceremonies</h2>
+        <span class="block-sub">Tap a date to adjust it</span>
+      </div>
+      <div id="eventList"></div>
+      <div class="add-event-row">
+        <input type="text" id="newEventName" placeholder="Add a function, e.g. Chooda Ceremony">
+        <input type="date" id="newEventDate">
+        <button class="btn" id="addEventBtn">Add</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- TASKS VIEW -->
+  <div class="view" id="view-tasks">
+    <section class="block">
+      <div class="block-head">
+        <h2>Tasks</h2>
+        <span class="block-sub" id="taskOverallProgress"></span>
+      </div>
+      <div id="taskPhases"></div>
+      <div class="add-task-row">
+        <input type="text" id="newTaskText" placeholder="Add a task">
+        <select id="newTaskPhase"></select>
+        <button class="btn" id="addTaskBtn">Add</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- BUDGET VIEW -->
+  <div class="view" id="view-budget">
+    <section class="block">
+      <div class="block-head">
+        <h2>Budget</h2>
+        <span class="block-sub">Estimated vs. actual, by category</span>
+      </div>
+
+      <div class="budget-summary">
+        <div class="sum-card">
+          <div class="sum-label">Total Budget</div>
+          <div class="budget-total-edit">
+            <span style="opacity:0.6;">$</span>
+            <input type="number" id="totalBudgetInput" min="0" step="100">
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Estimated</div>
+          <div class="sum-value" id="sumEstimated">$0</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Spent So Far</div>
+          <div class="sum-value" id="sumActual">$0</div>
+        </div>
+      </div>
+
+      <table class="budget-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th style="text-align:right;">Estimated</th>
+            <th style="text-align:right;">Spent</th>
+            <th>Progress</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="budgetBody"></tbody>
+      </table>
+
+      <div class="add-budget-row">
+        <input type="text" id="newBudgetCat" placeholder="Add a category, e.g. Photography">
+        <input type="number" id="newBudgetEst" placeholder="Estimated" min="0">
+        <input type="number" id="newBudgetAct" placeholder="Spent" min="0">
+        <button class="btn" id="addBudgetBtn">Add</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- SYNC VIEW -->
+  <div class="view" id="view-sync">
+    <section class="block">
+      <div class="block-head">
+        <h2>Sync with your fiancé</h2>
+        <span class="block-sub">Manual, two-way</span>
+      </div>
+      <p style="opacity:0.75; max-width:60ch;">This page saves privately to whoever's device is open — it doesn't update live for both of you. To share your latest changes, copy your code below and send it over text or WhatsApp; the other person pastes it in and loads it.</p>
+
+      <div style="margin-top:1.6rem;">
+        <h3 style="font-size:1.05rem; margin-bottom:0.4rem;" class="serif">Send your data</h3>
+        <textarea id="syncOut" readonly rows="3" style="width:100%; font-family:'Jost',sans-serif; font-size:0.8rem; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:0.6rem; resize:vertical;"></textarea>
+        <div style="margin-top:0.6rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+          <button class="btn" id="genSyncBtn">Generate code</button>
+          <button class="btn-ghost" id="copySyncBtn">Copy to clipboard</button>
+          <span id="copyStatus" style="font-size:0.8rem; opacity:0.6; align-self:center;"></span>
+        </div>
+      </div>
+
+      <div style="margin-top:2.2rem;">
+        <h3 style="font-size:1.05rem; margin-bottom:0.4rem;" class="serif">Load their data</h3>
+        <textarea id="syncIn" rows="3" placeholder="Paste the code they sent you" style="width:100%; font-family:'Jost',sans-serif; font-size:0.8rem; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:0.6rem; resize:vertical;"></textarea>
+        <div style="margin-top:0.6rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+          <button class="btn" id="loadSyncBtn">Load code</button>
+          <span id="loadStatus" style="font-size:0.8rem; opacity:0.6;"></span>
+        </div>
+        <p style="font-size:0.78rem; opacity:0.55; margin-top:0.5rem;">Loading a code replaces everything on this device — ceremonies, tasks, and budget — with what's in the code. Generate and send your own first if you don't want to lose your edits.</p>
+      </div>
+
+      <div style="margin-top:2.6rem; padding-top:1.8rem; border-top:1px solid var(--line);">
+        <h3 style="font-size:1.05rem; margin-bottom:0.4rem;" class="serif">Live sync (if you're self-hosting this file)</h3>
+        <p style="font-size:0.85rem; opacity:0.75; max-width:65ch;">
+          This turns on automatic, real-time updates for both of you — no copy-pasting codes. It only works when this HTML file is hosted somewhere outside Claude (your own site, GitHub Pages, Netlify, etc.), since that hosting is required to load the sync service. On the claude.ai link, this will show as unavailable.
+        </p>
+        <details style="margin:0.7rem 0; font-size:0.82rem; opacity:0.8;">
+          <summary style="cursor:pointer; font-weight:500;">One-time setup (about 3 minutes, free)</summary>
+          <ol style="padding-left:1.2rem; margin:0.6rem 0;">
+            <li>Go to <span style="opacity:0.7;">console.firebase.google.com</span> and create a free project.</li>
+            <li>In the project, open <strong>Build → Realtime Database</strong> and create a database in <strong>test mode</strong>.</li>
+            <li>Go to <strong>Project settings → General → Your apps</strong>, add a web app, and copy the whole <code>firebaseConfig</code> object it gives you.</li>
+            <li>Paste that config below, pick a room code only you two will use, and connect. Do the same on your fiancé's device with the identical config and room code.</li>
+          </ol>
+        </details>
+        <label style="font-size:0.78rem; opacity:0.65; display:block; margin-top:0.8rem;">Firebase config (paste the whole object)</label>
+        <textarea id="liveConfig" rows="4" placeholder='{"apiKey": "...", "databaseURL": "https://your-project.firebaseio.com", ...}' style="width:100%; font-family:'Jost',sans-serif; font-size:0.78rem; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:0.6rem; resize:vertical;"></textarea>
+        <div style="display:flex; gap:0.6rem; margin-top:0.6rem; flex-wrap:wrap;">
+          <input type="text" id="liveRoom" placeholder="Room code, e.g. amina-and-rafi" style="max-width:260px;">
+          <button class="btn" id="liveConnectBtn">Connect</button>
+          <button class="btn-ghost" id="liveDisconnectBtn">Disconnect</button>
+        </div>
+        <p id="liveStatus" style="font-size:0.82rem; margin-top:0.6rem; opacity:0.75;">Not connected — changes are only saved to this device.</p>
+        <p style="font-size:0.75rem; opacity:0.5; margin-top:0.5rem;">Note: test-mode databases are open to anyone with the config and room code. Fine for this kind of low-stakes personal use, but don't reuse this project for anything sensitive.</p>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer>Saved automatically on this device · Wedding Dashboard</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORE_KEY = "sa_wedding_dashboard_v1";
+
+  var DEFAULT_STATE = {
+    events: [
+      { id: "e1", name: "Gaye Holud (Bride's side)", date: "2026-07-24" },
+      { id: "e2", name: "Gaye Holud (Groom's side)", date: "2026-07-24" },
+      { id: "e3", name: "Mehndi Sondhya", date: "2026-07-25" },
+      { id: "e4", name: "Akd / Nikah", date: "2026-07-27" },
+      { id: "e5", name: "Bou Bhaat / Walima", date: "2026-07-29" }
+    ],
+    taskPhases: [
+      {
+        id: "p1", label: "9–12 months before",
+        tasks: [
+          { id: "t1", text: "Set overall budget and who's contributing", cat: "Planning", done: false },
+          { id: "t2", text: "Book venue(s) for each function", cat: "Venue", done: false },
+          { id: "t3", text: "Hire wedding planner or day-of coordinator", cat: "Vendors", done: false },
+          { id: "t4", text: "Confirm Kazi (registrar) and Moulvi for the Akd/Nikah", cat: "Rituals", done: false },
+          { id: "t5", text: "Draft guest list for each event", cat: "Guests", done: false },
+          { id: "t6", text: "Book photographer and videographer", cat: "Vendors", done: false }
+        ]
+      },
+      {
+        id: "p2", label: "6–9 months before",
+        tasks: [
+          { id: "t7", text: "Order or shop for bridal lehenga/outfit", cat: "Attire", done: false },
+          { id: "t8", text: "Book mehndi (henna) artist for Mehndi Sondhya", cat: "Vendors", done: false },
+          { id: "t9", text: "Book dhol players for Gaye Holud", cat: "Vendors", done: false },
+          { id: "t10", text: "Hire caterer and finalize menu tasting", cat: "Catering", done: false },
+          { id: "t11", text: "Book decorator for shamiyana/stage design", cat: "Decor", done: false },
+          { id: "t12", text: "Send save-the-dates", cat: "Guests", done: false }
+        ]
+      },
+      {
+        id: "p3", label: "3–6 months before",
+        tasks: [
+          { id: "t13", text: "Order groom's panjabi/sherwani for each function", cat: "Attire", done: false },
+          { id: "t14", text: "Plan Gaye Holud songs, dance, and turmeric ritual details", cat: "Events", done: false },
+          { id: "t15", text: "Book hair and makeup artists", cat: "Vendors", done: false },
+          { id: "t16", text: "Order wedding favors and gifts", cat: "Gifts", done: false },
+          { id: "t17", text: "Send formal invitations", cat: "Guests", done: false },
+          { id: "t18", text: "Arrange hotel blocks for out-of-town guests", cat: "Guests", done: false }
+        ]
+      },
+      {
+        id: "p4", label: "1–2 months before",
+        tasks: [
+          { id: "t19", text: "Final outfit fittings and alterations", cat: "Attire", done: false },
+          { id: "t20", text: "Confirm final headcount with caterer", cat: "Catering", done: false },
+          { id: "t21", text: "Confirm timeline and running order with all vendors", cat: "Planning", done: false },
+          { id: "t22", text: "Buy or borrow wedding jewelry", cat: "Attire", done: false },
+          { id: "t23", text: "Agree on mahr amount and prepare nikah nama details", cat: "Rituals", done: false },
+          { id: "t24", text: "Apply for any name-change or legal documents", cat: "Documents", done: false }
+        ]
+      },
+      {
+        id: "p5", label: "Week of",
+        tasks: [
+          { id: "t25", text: "Pack outfits and accessories for each function", cat: "Attire", done: false },
+          { id: "t26", text: "Confirm arrival times with dhol/band and photographer", cat: "Vendors", done: false },
+          { id: "t27", text: "Delegate a point person for each event day", cat: "Planning", done: false },
+          { id: "t28", text: "Prepare gifts for parents and close family", cat: "Gifts", done: false },
+          { id: "t29", text: "Do a final headcount and seating check", cat: "Guests", done: false }
+        ]
+      }
+    ],
+    budget: [
+      { id: "b1", cat: "Venue & Catering", est: 0, act: 0 },
+      { id: "b2", cat: "Attire & Jewelry", est: 0, act: 0 },
+      { id: "b3", cat: "Photography & Video", est: 0, act: 0 },
+      { id: "b4", cat: "Decor & Shamiyana/Stage", est: 0, act: 0 },
+      { id: "b5", cat: "Mehndi & Beauty", est: 0, act: 0 },
+      { id: "b6", cat: "Music & Dhol", est: 0, act: 0 },
+      { id: "b7", cat: "Invitations & Stationery", est: 0, act: 0 },
+      { id: "b8", cat: "Favors & Gifts", est: 0, act: 0 },
+      { id: "b9", cat: "Mahr & Nikah Essentials", est: 0, act: 0 }
+    ],
+    totalBudget: 25000
+  };
+
+  var uid = function (p) { return p + Math.random().toString(36).slice(2, 9); };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE));
+      var parsed = JSON.parse(raw);
+      if (!parsed.events || !parsed.taskPhases || !parsed.budget) return JSON.parse(JSON.stringify(DEFAULT_STATE));
+      return parsed;
+    } catch (e) {
+      console.error("Could not load saved dashboard, starting fresh.", e);
+      return JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+  }
+
+  var liveRef = null;
+  var liveSuppress = false;
+  var LIVE_KEY = "sa_wedding_live_v1";
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error("Could not save dashboard.", e);
+    }
+    if (liveRef && !liveSuppress) {
+      try {
+        liveRef.set(state);
+      } catch (e) {
+        console.error("Could not push live update.", e);
+      }
+    }
+  }
+
+  var state = loadState();
+
+  // ---------- Tabs ----------
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  var views = document.querySelectorAll(".view");
+  tabBtns.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      tabBtns.forEach(function (b) { b.classList.remove("active"); });
+      views.forEach(function (v) { v.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("view-" + btn.dataset.view).classList.add("active");
+    });
+  });
+
+  // ---------- Countdown ----------
+  var WEDDING_DATE = new Date("2026-07-27T00:00:00");
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function updateCountdown() {
+    var now = new Date();
+    var diff = WEDDING_DATE - now;
+    var wrap = document.getElementById("countdownWrap");
+    if (diff <= 0) {
+      wrap.innerHTML = '<div class="hero-arrived serif">The wedding has arrived — mubarak ho! 🎉</div>';
+      return;
+    }
+    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    var mins = Math.floor((diff / (1000 * 60)) % 60);
+    var secs = Math.floor((diff / 1000) % 60);
+    var dEl = document.getElementById("cd-days");
+    if (dEl) {
+      document.getElementById("cd-days").textContent = days;
+      document.getElementById("cd-hours").textContent = pad(hours);
+      document.getElementById("cd-mins").textContent = pad(mins);
+      document.getElementById("cd-secs").textContent = pad(secs);
+    }
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ---------- Events / Timeline ----------
+  var MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  function fmtDay(dateStr) {
+    if (!dateStr) return { d: "?", m: "" };
+    var parts = dateStr.split("-");
+    var dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    return { d: dt.getDate(), m: MONTHS[dt.getMonth()] };
+  }
+  function tagFor(name) {
+    var n = name.toLowerCase();
+    if (n.indexOf("holud") > -1 || n.indexOf("haldi") > -1) return { label: "Gaye Holud", color: "#DE9F1F" };
+    if (n.indexOf("mehndi") > -1 || n.indexOf("henna") > -1) return { label: "Mehndi", color: "#164E48" };
+    if (n.indexOf("akd") > -1 || n.indexOf("nikah") > -1) return { label: "Wedding Day", color: "#7A1E3C" };
+    if (n.indexOf("bou bhaat") > -1 || n.indexOf("walima") > -1 || n.indexOf("reception") > -1) return { label: "Reception", color: "#5A1530" };
+    return { label: "Function", color: "#5A1530" };
+  }
+
+  function renderEvents() {
+    var list = document.getElementById("eventList");
+    list.innerHTML = "";
+    var sorted = state.events.slice().sort(function (a, b) {
+      return (a.date || "").localeCompare(b.date || "");
+    });
+    sorted.forEach(function (ev) {
+      var day = fmtDay(ev.date);
+      var tag = tagFor(ev.name);
+      var row = document.createElement("div");
+      row.className = "event-row";
+      row.innerHTML =
+        '<div class="event-date">' + day.d + '<span class="mon">' + day.m + '</span></div>' +
+        '<div>' +
+          '<input type="text" class="ev-name-input" value="' + escapeAttr(ev.name) + '" data-id="' + ev.id + '" style="font-family:\'Marcellus\',serif; font-size:1.15rem; border:none; background:none; padding:0.1rem 0; color:var(--ink); width:100%;">' +
+          '<span class="event-tag" style="color:' + tag.color + ';">' + tag.label + '</span>' +
+        '</div>' +
+        '<div class="event-input">' +
+          '<input type="date" value="' + (ev.date || "") + '" data-id="' + ev.id + '" class="ev-date-input">' +
+        '</div>' +
+        '<button class="icon-btn" data-remove-event="' + ev.id + '" aria-label="Remove event">✕</button>';
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll(".ev-name-input").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        var ev = state.events.find(function (e) { return e.id === inp.dataset.id; });
+        if (ev) { ev.name = inp.value.trim() || ev.name; saveState(); renderEvents(); }
+      });
+    });
+    list.querySelectorAll(".ev-date-input").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        var ev = state.events.find(function (e) { return e.id === inp.dataset.id; });
+        if (ev) { ev.date = inp.value; saveState(); renderEvents(); }
+      });
+    });
+    list.querySelectorAll("[data-remove-event]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        state.events = state.events.filter(function (e) { return e.id !== btn.dataset.removeEvent; });
+        saveState();
+        renderEvents();
+      });
+    });
+  }
+
+  document.getElementById("addEventBtn").addEventListener("click", function () {
+    var nameInput = document.getElementById("newEventName");
+    var dateInput = document.getElementById("newEventDate");
+    var name = nameInput.value.trim();
+    if (!name) return;
+    state.events.push({ id: uid("e"), name: name, date: dateInput.value || "" });
+    nameInput.value = "";
+    dateInput.value = "";
+    saveState();
+    renderEvents();
+  });
+
+  // ---------- Tasks ----------
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderTasks() {
+    var container = document.getElementById("taskPhases");
+    container.innerHTML = "";
+    var totalAll = 0, doneAll = 0;
+
+    state.taskPhases.forEach(function (phase) {
+      var total = phase.tasks.length;
+      var done = phase.tasks.filter(function (t) { return t.done; }).length;
+      totalAll += total; doneAll += done;
+
+      var phaseEl = document.createElement("div");
+      phaseEl.className = "task-phase";
+      var head = document.createElement("div");
+      head.className = "phase-title";
+      head.innerHTML = '<span>' + escapeHtml(phase.label) + '</span><span class="phase-progress">' + done + ' / ' + total + '</span>';
+      phaseEl.appendChild(head);
+
+      phase.tasks.forEach(function (task) {
+        var row = document.createElement("div");
+        row.className = "task-item";
+        row.innerHTML =
+          '<input type="checkbox" class="task-check" ' + (task.done ? "checked" : "") + ' data-phase="' + phase.id + '" data-task="' + task.id + '">' +
+          '<div class="task-text ' + (task.done ? "done" : "") + '">' + escapeHtml(task.text) +
+            '<span class="task-cat">' + escapeHtml(task.cat) + '</span>' +
+          '</div>' +
+          '<button class="icon-btn" data-remove-phase="' + phase.id + '" data-remove-task="' + task.id + '" aria-label="Remove task">✕</button>';
+        phaseEl.appendChild(row);
+      });
+
+      container.appendChild(phaseEl);
+    });
+
+    container.querySelectorAll(".task-check").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        var phase = state.taskPhases.find(function (p) { return p.id === cb.dataset.phase; });
+        var task = phase && phase.tasks.find(function (t) { return t.id === cb.dataset.task; });
+        if (task) { task.done = cb.checked; saveState(); renderTasks(); }
+      });
+    });
+    container.querySelectorAll("[data-remove-task]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var phase = state.taskPhases.find(function (p) { return p.id === btn.dataset.removePhase; });
+        if (phase) {
+          phase.tasks = phase.tasks.filter(function (t) { return t.id !== btn.dataset.removeTask; });
+          saveState(); renderTasks();
+        }
+      });
+    });
+
+    var overall = document.getElementById("taskOverallProgress");
+    overall.textContent = totalAll ? (doneAll + " of " + totalAll + " done") : "No tasks yet";
+
+    var select = document.getElementById("newTaskPhase");
+    select.innerHTML = "";
+    state.taskPhases.forEach(function (phase) {
+      var opt = document.createElement("option");
+      opt.value = phase.id;
+      opt.textContent = phase.label;
+      select.appendChild(opt);
+    });
+  }
+
+  document.getElementById("addTaskBtn").addEventListener("click", function () {
+    var textInput = document.getElementById("newTaskText");
+    var phaseSelect = document.getElementById("newTaskPhase");
+    var text = textInput.value.trim();
+    if (!text) return;
+    var phase = state.taskPhases.find(function (p) { return p.id === phaseSelect.value; });
+    if (phase) {
+      phase.tasks.push({ id: uid("t"), text: text, cat: "Custom", done: false });
+      textInput.value = "";
+      saveState();
+      renderTasks();
+    }
+  });
+
+  // ---------- Budget ----------
+  function money(n) {
+    n = Number(n) || 0;
+    return "$" + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  }
+
+  function renderBudget() {
+    var body = document.getElementById("budgetBody");
+    body.innerHTML = "";
+    var estTotal = 0, actTotal = 0;
+
+    state.budget.forEach(function (row) {
+      estTotal += Number(row.est) || 0;
+      actTotal += Number(row.act) || 0;
+      var pct = row.est > 0 ? Math.min(100, Math.round((row.act / row.est) * 100)) : (row.act > 0 ? 100 : 0);
+      var over = row.act > row.est && row.est > 0;
+
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td><input type="text" value="' + escapeAttr(row.cat) + '" data-field="cat" data-id="' + row.id + '"></td>' +
+        '<td style="text-align:right;"><input type="number" min="0" value="' + row.est + '" data-field="est" data-id="' + row.id + '" style="text-align:right;"></td>' +
+        '<td style="text-align:right;"><input type="number" min="0" value="' + row.act + '" data-field="act" data-id="' + row.id + '" style="text-align:right;"></td>' +
+        '<td class="bar-cell"><div class="bar-track"><div class="bar-fill ' + (over ? "over" : "") + '" style="width:' + pct + '%;"></div></div></td>' +
+        '<td><button class="icon-btn" data-remove-budget="' + row.id + '" aria-label="Remove category">✕</button></td>';
+      body.appendChild(tr);
+    });
+
+    body.querySelectorAll("input").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        var row = state.budget.find(function (r) { return r.id === inp.dataset.id; });
+        if (!row) return;
+        var field = inp.dataset.field;
+        row[field] = field === "cat" ? inp.value : (parseFloat(inp.value) || 0);
+        saveState();
+        renderBudget();
+      });
+    });
+    body.querySelectorAll("[data-remove-budget]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        state.budget = state.budget.filter(function (r) { return r.id !== btn.dataset.removeBudget; });
+        saveState();
+        renderBudget();
+      });
+    });
+
+    document.getElementById("sumEstimated").textContent = money(estTotal);
+    var actEl = document.getElementById("sumActual");
+    actEl.textContent = money(actTotal);
+    actEl.className = "sum-value" + (actTotal > (state.totalBudget || 0) ? " over" : "");
+
+    document.getElementById("totalBudgetInput").value = state.totalBudget || 0;
+  }
+
+  function escapeAttr(str) {
+    return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  }
+
+  document.getElementById("totalBudgetInput").addEventListener("change", function (e) {
+    state.totalBudget = parseFloat(e.target.value) || 0;
+    saveState();
+    renderBudget();
+  });
+
+  document.getElementById("addBudgetBtn").addEventListener("click", function () {
+    var catInput = document.getElementById("newBudgetCat");
+    var estInput = document.getElementById("newBudgetEst");
+    var actInput = document.getElementById("newBudgetAct");
+    var cat = catInput.value.trim();
+    if (!cat) return;
+    state.budget.push({
+      id: uid("b"),
+      cat: cat,
+      est: parseFloat(estInput.value) || 0,
+      act: parseFloat(actInput.value) || 0
+    });
+    catInput.value = ""; estInput.value = ""; actInput.value = "";
+    saveState();
+    renderBudget();
+  });
+
+  // ---------- Sync (manual export/import) ----------
+  function renderAll() {
+    renderEvents();
+    renderTasks();
+    renderBudget();
+  }
+
+  function encodeState(obj) {
+    var json = JSON.stringify(obj);
+    return "WED1-" + btoa(unescape(encodeURIComponent(json)));
+  }
+  function decodeState(code) {
+    var trimmed = code.trim();
+    var payload = trimmed.indexOf("WED1-") === 0 ? trimmed.slice(5) : trimmed;
+    var json = decodeURIComponent(escape(atob(payload)));
+    return JSON.parse(json);
+  }
+
+  document.getElementById("genSyncBtn").addEventListener("click", function () {
+    document.getElementById("syncOut").value = encodeState(state);
+    document.getElementById("copyStatus").textContent = "";
+  });
+
+  document.getElementById("copySyncBtn").addEventListener("click", function () {
+    var box = document.getElementById("syncOut");
+    if (!box.value) {
+      box.value = encodeState(state);
+    }
+    var status = document.getElementById("copyStatus");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(box.value).then(function () {
+        status.textContent = "Copied!";
+      }).catch(function () {
+        box.select();
+        status.textContent = "Select and copy manually";
+      });
+    } else {
+      box.select();
+      status.textContent = "Select and copy manually";
+    }
+  });
+
+  document.getElementById("loadSyncBtn").addEventListener("click", function () {
+    var input = document.getElementById("syncIn");
+    var status = document.getElementById("loadStatus");
+    var code = input.value;
+    if (!code || !code.trim()) {
+      status.textContent = "Paste a code first.";
+      return;
+    }
+    try {
+      var incoming = decodeState(code);
+      if (!incoming.events || !incoming.taskPhases || !incoming.budget) {
+        throw new Error("missing fields");
+      }
+      state = incoming;
+      saveState();
+      renderAll();
+      status.textContent = "Loaded! This device now matches the code.";
+      input.value = "";
+    } catch (e) {
+      console.error("Could not read sync code.", e);
+      status.textContent = "That code didn't look right — check it was copied in full.";
+    }
+  });
+
+  // ---------- Init ----------
+  renderAll();
+
+  // ---------- Live sync (optional, self-hosted only) ----------
+  function setLiveStatus(text, isError) {
+    var el = document.getElementById("liveStatus");
+    el.textContent = text;
+    el.style.color = isError ? "var(--blush)" : "";
+  }
+
+  function connectLive(configStr, room, silent) {
+    if (typeof firebase === "undefined") {
+      setLiveStatus("Live sync isn't available on this hosting — this only works when the file is self-hosted (see instructions above).", true);
+      return;
+    }
+    if (!room || !room.trim()) {
+      setLiveStatus("Enter a room code first.", true);
+      return;
+    }
+    var config;
+    try {
+      config = JSON.parse(configStr);
+    } catch (e) {
+      setLiveStatus("That doesn't look like valid config — paste the full firebaseConfig object.", true);
+      return;
+    }
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(config);
+      }
+      var db = firebase.database();
+      if (liveRef) { liveRef.off(); }
+      liveRef = db.ref("wedding_dashboards/" + room.trim());
+      liveRef.on("value", function (snapshot) {
+        var remote = snapshot.val();
+        if (remote && remote.events && remote.taskPhases && remote.budget) {
+          liveSuppress = true;
+          state = remote;
+          try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+          renderAll();
+          liveSuppress = false;
+          setLiveStatus("Connected and live — last update just now.");
+        } else {
+          liveRef.set(state);
+          setLiveStatus("Connected and live — this device seeded the room.");
+        }
+      }, function (err) {
+        console.error("Live sync error", err);
+        setLiveStatus("Connection error: " + (err && err.message ? err.message : "check your config and try again."), true);
+      });
+      localStorage.setItem(LIVE_KEY, JSON.stringify({ config: config, room: room.trim() }));
+      if (!silent) setLiveStatus("Connecting…");
+    } catch (e) {
+      console.error("Could not connect live sync.", e);
+      setLiveStatus("Couldn't connect — double check the config was pasted in full.", true);
+    }
+  }
+
+  function disconnectLive() {
+    if (liveRef) { liveRef.off(); liveRef = null; }
+    try { localStorage.removeItem(LIVE_KEY); } catch (e) {}
+    setLiveStatus("Not connected — changes are only saved to this device.");
+  }
+
+  document.getElementById("liveConnectBtn").addEventListener("click", function () {
+    connectLive(document.getElementById("liveConfig").value, document.getElementById("liveRoom").value, false);
+  });
+  document.getElementById("liveDisconnectBtn").addEventListener("click", disconnectLive);
+
+  (function restoreLive() {
+    try {
+      var saved = localStorage.getItem(LIVE_KEY);
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        document.getElementById("liveConfig").value = JSON.stringify(parsed.config, null, 2);
+        document.getElementById("liveRoom").value = parsed.room;
+        connectLive(JSON.stringify(parsed.config), parsed.room, true);
+      }
+    } catch (e) {
+      console.error("Could not restore live sync setup.", e);
+    }
+  })();
+})();
+</script>
+</body>
+</html>

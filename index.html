@@ -580,12 +580,12 @@
       <div style="margin-top:2.6rem; padding-top:1.8rem; border-top:1px solid var(--line);">
         <h3 style="font-size:1.05rem; margin-bottom:0.4rem;" class="serif">Live sync (if you're self-hosting this file)</h3>
         <p style="font-size:0.85rem; opacity:0.75; max-width:65ch;">
-          This turns on automatic, real-time updates for us. 
+          This turns on automatic, real-time updates for us.
         </p>
         <details style="margin:0.7rem 0; font-size:0.82rem; opacity:0.8;">
-          <summary style="cursor:pointer; font-weight:500;">One-time setup</summary>
+          <summary style="cursor:pointer; font-weight:500;">One-time setup (about 3 minutes, free)</summary>
           <ol style="padding-left:1.2rem; margin:0.6rem 0;">
-            <li>Room code is: alvi-and-piu </li>
+            <p>Room code: alvi-and-piu</p>
           </ol>
         </details>
         <label style="font-size:0.78rem; opacity:0.65; display:block; margin-top:0.8rem;">Firebase config (paste the whole object)</label>
@@ -604,7 +604,6 @@
           <button class="btn-ghost" id="liveDisconnectBtn">Disconnect</button>
         </div>
         <p id="liveStatus" style="font-size:0.82rem; margin-top:0.6rem; opacity:0.75;">Not connected — changes are only saved to this device.</p>
-      
       </div>
     </section>
   </div>
@@ -874,14 +873,30 @@
         row.className = "task-item";
         row.innerHTML =
           '<input type="checkbox" class="task-check" ' + (task.done ? "checked" : "") + ' data-phase="' + phase.id + '" data-task="' + task.id + '">' +
-          '<div class="task-text ' + (task.done ? "done" : "") + '">' + escapeHtml(task.text) +
-            '<span class="task-cat">' + escapeHtml(task.cat) + '</span>' +
+          '<div style="flex:1;">' +
+            '<input type="text" class="task-text-input" data-phase="' + phase.id + '" data-task="' + task.id + '" value="' + escapeAttr(task.text) + '" style="width:100%; border:none; background:none; font-family:\'Jost\',sans-serif; font-size:0.94rem; color:var(--ink); padding:0.15rem 0; text-decoration:' + (task.done ? "line-through" : "none") + '; opacity:' + (task.done ? "0.45" : "1") + ';">' +
+            '<input type="text" class="task-cat-input" data-phase="' + phase.id + '" data-task="' + task.id + '" value="' + escapeAttr(task.cat) + '" style="width:100%; border:none; background:none; font-family:\'Jost\',sans-serif; font-size:0.68rem; letter-spacing:0.04em; opacity:0.55; padding:0.05rem 0;">' +
           '</div>' +
           '<button class="icon-btn" data-remove-phase="' + phase.id + '" data-remove-task="' + task.id + '" aria-label="Remove task">✕</button>';
         phaseEl.appendChild(row);
       });
 
       container.appendChild(phaseEl);
+    });
+
+    container.querySelectorAll(".task-text-input").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        var phase = state.taskPhases.find(function (p) { return p.id === inp.dataset.phase; });
+        var task = phase && phase.tasks.find(function (t) { return t.id === inp.dataset.task; });
+        if (task) { task.text = inp.value.trim() || task.text; saveState(); renderTasks(); }
+      });
+    });
+    container.querySelectorAll(".task-cat-input").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        var phase = state.taskPhases.find(function (p) { return p.id === inp.dataset.phase; });
+        var task = phase && phase.tasks.find(function (t) { return t.id === inp.dataset.task; });
+        if (task) { task.cat = inp.value.trim() || task.cat; saveState(); renderTasks(); }
+      });
     });
 
     container.querySelectorAll(".task-check").forEach(function (cb) {

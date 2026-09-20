@@ -580,15 +580,21 @@
       <div style="margin-top:2.6rem; padding-top:1.8rem; border-top:1px solid var(--line);">
         <h3 style="font-size:1.05rem; margin-bottom:0.4rem;" class="serif">Live sync (if you're self-hosting this file)</h3>
         <p style="font-size:0.85rem; opacity:0.75; max-width:65ch;">
-          This turns on automatic, real-time updates for both of you — no copy-pasting codes. It only works when this HTML file is hosted somewhere outside Claude (your own site, GitHub Pages, Netlify, etc.), since that hosting is required to load the sync service. On the claude.ai link, this will show as unavailable.
+          This turns on automatic, real-time updates for us, no copy-pasting codes. 
         </p>
         <details style="margin:0.7rem 0; font-size:0.82rem; opacity:0.8;">
-          <summary style="cursor:pointer; font-weight:500;">One-time setup (about 3 minutes, free)</summary>
+          <summary style="cursor:pointer; font-weight:500;">One-time setup (about 1 minute)</summary>
           <ol style="padding-left:1.2rem; margin:0.6rem 0;">
-            <li>Go to <span style="opacity:0.7;">console.firebase.google.com</span> and create a free project.</li>
-            <li>In the project, open <strong>Build → Realtime Database</strong> and create a database in <strong>test mode</strong>.</li>
-            <li>Go to <strong>Project settings → General → Your apps</strong>, add a web app, and copy the whole <code>firebaseConfig</code> object it gives you.</li>
-            <li>Paste that config below, pick a room code only you two will use, and connect. Do the same on your fiancé's device with the identical config and room code.</li>
+            <p>paste the following into the text box below:{
+  "apiKey": "AIzaSyBk179dFzQvZ8npj59OwtrJJeTzEnMYdT4",
+  "authDomain": "ourweddingdashboard.firebaseapp.com",
+  "databaseURL": "https://ourweddingdashboard-default-rtdb.firebaseio.com",
+  "projectId": "ourweddingdashboard",
+  "storageBucket": "ourweddingdashboard.firebasestorage.app",
+  "messagingSenderId": "462674540890",
+  "appId": "1:462674540890:web:2486fb751cede480ca1b63"
+}
+</p>
           </ol>
         </details>
         <label style="font-size:0.78rem; opacity:0.65; display:block; margin-top:0.8rem;">Firebase config (paste the whole object)</label>

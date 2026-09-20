@@ -580,12 +580,16 @@
       <div style="margin-top:2.6rem; padding-top:1.8rem; border-top:1px solid var(--line);">
         <h3 style="font-size:1.05rem; margin-bottom:0.4rem;" class="serif">Live sync (if you're self-hosting this file)</h3>
         <p style="font-size:0.85rem; opacity:0.75; max-width:65ch;">
-          This turns on automatic, real-time updates for us, no copy-pasting codes. 
+          This turns on automatic, real-time updates for us. 
         </p>
         <details style="margin:0.7rem 0; font-size:0.82rem; opacity:0.8;">
-          <summary style="cursor:pointer; font-weight:500;">One-time setup (about 1 minute)</summary>
+          <summary style="cursor:pointer; font-weight:500;">One-time setup</summary>
           <ol style="padding-left:1.2rem; margin:0.6rem 0;">
-            <p>paste the following into the text box below:{
+            <li>Room code is: alvi-and-piu </li>
+          </ol>
+        </details>
+        <label style="font-size:0.78rem; opacity:0.65; display:block; margin-top:0.8rem;">Firebase config (paste the whole object)</label>
+        <textarea id="liveConfig" rows="8" placeholder='{"apiKey": "...", "databaseURL": "https://your-project.firebaseio.com", ...}' style="width:100%; font-family:'Jost',sans-serif; font-size:0.78rem; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:0.6rem; resize:vertical;">{
   "apiKey": "AIzaSyBk179dFzQvZ8npj59OwtrJJeTzEnMYdT4",
   "authDomain": "ourweddingdashboard.firebaseapp.com",
   "databaseURL": "https://ourweddingdashboard-default-rtdb.firebaseio.com",
@@ -593,19 +597,14 @@
   "storageBucket": "ourweddingdashboard.firebasestorage.app",
   "messagingSenderId": "462674540890",
   "appId": "1:462674540890:web:2486fb751cede480ca1b63"
-}
-</p>
-          </ol>
-        </details>
-        <label style="font-size:0.78rem; opacity:0.65; display:block; margin-top:0.8rem;">Firebase config (paste the whole object)</label>
-        <textarea id="liveConfig" rows="4" placeholder='{"apiKey": "...", "databaseURL": "https://your-project.firebaseio.com", ...}' style="width:100%; font-family:'Jost',sans-serif; font-size:0.78rem; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:0.6rem; resize:vertical;"></textarea>
+}</textarea>
         <div style="display:flex; gap:0.6rem; margin-top:0.6rem; flex-wrap:wrap;">
           <input type="text" id="liveRoom" placeholder="Room code, e.g. amina-and-rafi" style="max-width:260px;">
           <button class="btn" id="liveConnectBtn">Connect</button>
           <button class="btn-ghost" id="liveDisconnectBtn">Disconnect</button>
         </div>
         <p id="liveStatus" style="font-size:0.82rem; margin-top:0.6rem; opacity:0.75;">Not connected — changes are only saved to this device.</p>
-        <p style="font-size:0.75rem; opacity:0.5; margin-top:0.5rem;">Note: test-mode databases are open to anyone with the config and room code. Fine for this kind of low-stakes personal use, but don't reuse this project for anything sensitive.</p>
+      
       </div>
     </section>
   </div>
